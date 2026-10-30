@@ -1,0 +1,90 @@
+# =====================================================================================
+# ATOMTRICK on rMD17 -- the paper model.  Base config: every key explicit.
+# =====================================================================================
+# Reproduces : rMD17 energy / force MAE and force-L2 per molecule (the paper's rMD17 E/F MAE and
+#              F-L2 tables), mean +- std over seeds 42, 1, 2.  3,730,368 parameters.
+#              Also the O(2) side of every rMD17 ablation (ablations/*.yaml override this file).
+# Hardware   : 1x NVIDIA L40S (48 GB), make_fx compiled training path: 9.1-12.6 h per molecule
+#              and seed, median 9.5 h (aspirin seed 42: 9 h 05 min, ~23 steps/s); 30 runs
+#              (10 molecules x 3 seeds) 305 GPU-h.
+# Result     : test set (official index_test_01, 1000 structures; scripts/reproduce/rmd17.sh scores
+#              each run's *_best.pt with evaluate.py), 3-seed mean over molecules:
+#              E 0.448 meV / F 2.227 meV/A / F-L2 4.479 meV/A.
+# Caveats    : * Training is not bitwise deterministic (scatter_add atomics + inductor); across
+#                seeds 42/1/2 force MAE varies by ~3% (coefficient of variation) per molecule.
+#              * Labels: kcal/mol -> eV conversion and reference subtraction in float64; only the
+#                residual is cast to float32.
+#
+# Usage:  python train.py --config configs/rmd17/atomtrick.yaml --molecule aspirin --seed 42
+#         (or scripts/reproduce/rmd17.sh for all molecules/seeds + test evaluation)
+# Placeholders {molecule}, {seed}, {experiment} are filled in by train.py after merging.
+# Keys are train.py argparse names.  Deliberately absent: raw_data_dir / dataset / processed_dir /
+# split_id (auto-processing path; setting `dataset` would also switch the atomic reference energies
+# away from the ones these runs use) and retired no-op flags.
+
+# ---- run identity / I/O -------------------------------------------------------------
+experiment: rmd17_atomtrick
+molecule: null                       # REQUIRED: pass --molecule <name>
+seed: 42                             # reported runs: 42, 1, 2
+out_dir: "runs/{experiment}/{molecule}/s{seed}"
+wandb_name: "{experiment}_{molecule}_s{seed}"   # also the checkpoint file stem
+wandb_project: null                  # W&B off; pass --wandb_project NAME to log
+log_level: INFO
+save_every: 12500
+resume: null
+device: null                         # auto (cuda:0 if available)
+
+# ---- data ---------------------------------------------------------------------------
+data: "data/rmd17/{molecule}_train_default.npz"      # 950 structures
+val_data: "data/rmd17/{molecule}_val_default.npz"    # 50 structures (checkpoint selection)
+val_split: 0.0
+test_data: null                      # test is scored afterwards by evaluate.py on *_best.pt
+num_workers: 1
+
+# ---- model (3,730,368 parameters) ---------------------------------------------------
+irreps: 64x0e+64x1o+64x2e+64x3o      # Lmax 3, 64 channels per degree
+n_layers: 6
+n_heads: 8
+ff_mult: 4
+max_z: 100
+ffn_act_mode: gate
+attn_nonlin: identity                # unnormalised attention weights <q,k>/sqrt(d)
+layernorm_mode: shared               # centre l=0, one RMS over all degrees
+escn_frame: polefree                 # pole-free edge-frame Wigner-D (euler = direct Euler-angle evaluation, same function)
+kv_mode: o2                          # shorthand for k_mode + v_mode (both explicit below)
+k_mode: o2                           # learned O(2)-linear edge projections for keys ...
+v_mode: o2                           # ... and values
+radial_mode: gate
+rbf_type: expnorm
+num_radial_basis: 32
+radial_hidden: 256
+cutoff: 5.0
+edge_cutoff: 5.0
+max_neighbors: 0                     # keep all neighbours within edge_cutoff
+energy_hidden: 256
+dtype: float32
+matmul_precision: highest            # full fp32 matmuls (high = TF32)
+
+# ---- compile path -------------------------------------------------------------------
+makefx: "auto"                       # auto = on iff CUDA is available (reported runs: on)
+makefx_duckoff: "on"                 # fixed atom count per molecule (reported runs: on)
+
+# ---- optimisation -------------------------------------------------------------------
+optimizer: adamw
+lr: 2.0e-4
+weight_decay: 0.0
+max_iterations: 750000
+batch_size: 4
+eval_batch_size: 4                   # must be <= batch_size on the make_fx path
+grad_clip: 10.0
+rho_force: 0.999                     # loss = rho*MSE(F) + (1-rho)*MSE(E)
+fit_atomic_refs: false               # fixed atomic reference energies (constants.py)
+warmup_steps: 10000
+eval_every: 2500
+scheduler_patience: 3                # ReduceLROnPlateau on val loss: 3 evals = 7,500 steps
+scheduler_factor: 0.8
+scheduler_min_lr: 1.0e-7
+ema_decay: 0.99                      # EMA weights are validated and saved as *_best.pt
+swa_start: 0                         # no SWA stage
+swa_rho_force: 0.1                   # unused (swa_start 0)
+swa_lr: 0.0                          # unused (swa_start 0)

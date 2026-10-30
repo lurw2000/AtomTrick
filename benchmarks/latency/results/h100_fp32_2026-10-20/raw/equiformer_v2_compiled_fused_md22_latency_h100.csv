@@ -1,0 +1,15 @@
+molecule,atoms,batch_size,total_atoms_per_batch,n_params,warmup,iters,latency_mean_ms,latency_median_ms,latency_p10_ms,latency_p90_ms,latency_std_ms,throughput_samples_per_s,peak_mem_gb,gpu_name,coords,status,matmul_precision,cudnn_allow_tf32,param_dtype,forces,create_graph,edges,graph_build_median_ms,torch_version,cuda_version,compile,compile_graphs_warmup,compile_graphs_timed,compile_graph_breaks,compile_warmup_s,compile_retimed,compile_max_rel_err,pytorch_jit
+Ac_Ala3_NHMe,42,1,42,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,1086,0.1863359957933426,2.5.1+cu124,12.4,fused,,,,,,,0
+Ac_Ala3_NHMe,42,4,168,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,4334,0.2088960036635399,2.5.1+cu124,12.4,fused,,,,,,,0
+DHA,56,1,56,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,1474,0.1828320026397705,2.5.1+cu124,12.4,fused,,,,,,,0
+DHA,56,4,224,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,5928,0.2181600034236908,2.5.1+cu124,12.4,fused,,,,,,,0
+AT_AT,60,1,60,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,1476,0.18297600001096725,2.5.1+cu124,12.4,fused,,,,,,,0
+AT_AT,60,4,240,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,5928,0.2168480008840561,2.5.1+cu124,12.4,fused,,,,,,,0
+stachyose,87,1,87,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,2745,0.1977119967341423,2.5.1+cu124,12.4,fused,,,,,,,0
+stachyose,87,4,348,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,10964,0.22166399657726288,2.5.1+cu124,12.4,fused,,,,,,,0
+AT_AT_CG_CG,118,1,118,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,3529,0.2067359983921051,2.5.1+cu124,12.4,fused,,,,,,,0
+AT_AT_CG_CG,118,4,472,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,14105,0.23476799577474594,2.5.1+cu124,12.4,fused,,,,,,,0
+buckyball_catcher,148,1,148,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,4602,0.21398400515317917,2.5.1+cu124,12.4,fused,,,,,,,0
+buckyball_catcher,148,4,592,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,18413,0.22883199900388718,2.5.1+cu124,12.4,fused,,,,,,,0
+double_walled_nanotube,370,1,370,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,13614,0.2553759962320328,2.5.1+cu124,12.4,fused,,,,,,,0
+double_walled_nanotube,370,4,1480,77182465,10,50,,,,,,,,NVIDIA H100 80GB HBM3,raw,oom,highest,False,float32,autograd,True,54507,0.2698719948530197,2.5.1+cu124,12.4,fused,,,,,,,0

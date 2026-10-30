@@ -1,0 +1,15 @@
+# =====================================================================================
+# rMD17 ablation: node-level O(3)-linear key/value projections (no edge-frame O(2) mixing).
+# =====================================================================================
+# Reproduces : the "O(2)-KV = no" row of the paper's ablation table.  2,452,416 parameters.
+# Result     : test set, seed 42, mean over molecules: E 9.467 / F 19.299 vs paper model (seed 42)
+#              0.457 / 2.224 (E +1973.0 % / F +767.9 %; worse on E and F for 10/10 molecules).
+# Hardware   : 1x L40S; 6.8 h (6.7-9.0 h) per molecule, median (range) over the 10 molecules.
+# Usage: python train.py --config configs/rmd17/atomtrick.yaml --config configs/rmd17/ablations/o3_kv.yaml --molecule M --seed S
+#        (or: bash scripts/reproduce/rmd17_ablations.sh o3_kv)
+# Override file: only the changed keys + experiment name; everything else comes from atomtrick.yaml.
+
+experiment: rmd17_o3_kv
+kv_mode: o3
+k_mode: o3
+v_mode: o3

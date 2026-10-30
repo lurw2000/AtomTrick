@@ -1,0 +1,95 @@
+# =====================================================================================
+# ATOMTRICK on MD22 -- the paper model, AdamW.  Base config: every key explicit.
+# =====================================================================================
+# Reproduces : MD22 energy / force MAE and force-L2 for the 7 systems (the paper's MD22 tables).
+#              Same architecture as the rMD17 model, 3,730,368 parameters; the 7 runs differ only
+#              in data / out_dir / wandb_name.
+# Hardware   : one GPU per system (~155 GPU-h in total):
+#              H100 80 GB: Ac-Ala3-NHMe 10.6 h, DHA 11.2 h, AT-AT 11.1 h.
+#              H200 141 GB: stachyose 16.7 h, AT-AT-CG-CG 16.4 h, buckyball-catcher 25.3 h,
+#              double-walled_nanotube 63.7 h (make_fx at batch size 4 needs H200-class memory).
+#              stachyose, AT-AT-CG-CG and buckyball-catcher were interrupted once and resumed from
+#              the rolling checkpoint; their times are the sum of both jobs.
+# Result     : test split, seed 42, E meV / F meV/A:
+#                Ac-Ala3-NHMe 2.98 / 2.110   DHA 4.95 / 1.814         AT-AT 3.19 / 2.118
+#                stachyose 4.91 / 1.958      AT-AT-CG-CG 3.81 / 2.834 buckyball-catcher 14.49 / 2.303
+#                double-walled_nanotube 32.78 / 8.783
+# Caveats    : * Splits: training sizes of Chmiela et al. (2023); validation (500, or 100 for the two
+#                largest systems) and test (= all remaining frames) are our random split with seed 1
+#                (scripts/data/prepare_md22.py).
+#              * Evaluate with evaluate.py --eval_bs 8/8/8/4/4/2/1 (Ac-Ala3-NHMe, DHA, AT-AT,
+#                stachyose, AT-AT-CG-CG, buckyball-catcher, nanotube) -- memory, not accuracy.
+#              * Training is not bitwise deterministic; expect small differences on re-run.
+#
+# Usage:  python train.py --config configs/md22/atomtrick.yaml --molecule DHA
+#         (or scripts/reproduce/md22.sh for all systems + test evaluation)
+# Placeholders {molecule}, {seed}, {experiment} are filled in by train.py after merging.
+# Deliberately absent: raw_data_dir / dataset / processed_dir / split_id (auto-processing path;
+# `dataset` would also switch the atomic reference energies) and retired no-op flags.
+
+# ---- run identity / I/O -------------------------------------------------------------
+experiment: md22_atomtrick
+molecule: null                       # REQUIRED: pass --molecule <system>
+seed: 42                             # reported runs: 42 only
+out_dir: "runs/{experiment}/{molecule}/s{seed}"
+wandb_name: "{experiment}_{molecule}_s{seed}"   # also the checkpoint file stem
+wandb_project: null                  # W&B off; pass --wandb_project NAME to log
+log_level: INFO
+save_every: 12500
+resume: null
+device: null                         # auto (cuda:0 if available)
+
+# ---- data ---------------------------------------------------------------------------
+data: "data/md22/{molecule}_train_default.npz"       # 600-8000 structures
+val_data: "data/md22/{molecule}_val_default.npz"     # 100-500 structures (checkpoint selection)
+val_split: 0.0
+test_data: null                      # test is scored afterwards by evaluate.py on *_best.pt
+num_workers: 1
+
+# ---- model (3,730,368 parameters) ---------------------------------------------------
+irreps: 64x0e+64x1o+64x2e+64x3o      # Lmax 3, 64 channels per degree
+n_layers: 6
+n_heads: 8
+ff_mult: 4
+max_z: 100
+ffn_act_mode: gate
+attn_nonlin: identity                # unnormalised attention weights <q,k>/sqrt(d)
+layernorm_mode: shared               # centre l=0, one RMS over all degrees
+escn_frame: polefree                 # pole-free edge-frame Wigner-D (euler = direct Euler-angle evaluation, same function)
+kv_mode: o2                          # shorthand for k_mode + v_mode (both explicit below)
+k_mode: o2                           # learned O(2)-linear edge projections for keys ...
+v_mode: o2                           # ... and values
+radial_mode: gate
+rbf_type: expnorm
+num_radial_basis: 32
+radial_hidden: 256
+cutoff: 5.0
+edge_cutoff: 5.0
+max_neighbors: 0                     # keep all neighbours within edge_cutoff
+energy_hidden: 256
+dtype: float32
+matmul_precision: highest            # full fp32 matmuls (high = TF32)
+
+# ---- compile path -------------------------------------------------------------------
+makefx: "auto"                       # auto = on iff CUDA is available (reported runs: on)
+makefx_duckoff: "on"                 # fixed atom count per system (reported runs: on)
+
+# ---- optimisation -------------------------------------------------------------------
+optimizer: adamw
+lr: 2.0e-4
+weight_decay: 0.0
+max_iterations: 750000
+batch_size: 4
+eval_batch_size: 4                   # must be <= batch_size on the make_fx path
+grad_clip: 10.0
+rho_force: 0.999                     # loss = rho*MSE(F) + (1-rho)*MSE(E)
+fit_atomic_refs: false               # fixed atomic reference energies (constants.py)
+warmup_steps: 10000
+eval_every: 2500
+scheduler_patience: 3                # ReduceLROnPlateau on val loss: 3 evals = 7,500 steps
+scheduler_factor: 0.8
+scheduler_min_lr: 1.0e-7
+ema_decay: 0.99                      # EMA weights are validated and saved as *_best.pt
+swa_start: 0                         # no SWA stage
+swa_rho_force: 0.1                   # unused (swa_start 0)
+swa_lr: 0.0                          # unused (swa_start 0)

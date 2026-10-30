@@ -1,0 +1,95 @@
+# md5 checksums of the dataset files used for every published ATOMTRICK run.
+# Paths are relative to the repository root.  Check with:   md5sum -c --ignore-missing scripts/data/checksums.md5
+#
+# IMPORTANT: processed NPZs you REGENERATE with scripts/data/prepare_*.py will NOT match the
+# file-level md5s below even when every array is bit-identical (numpy.savez_compressed stamps each
+# zip member with the current time).  Verify regenerated files with the array-level manifest instead:
+#     python scripts/data/verify_data.py        (reads scripts/data/checksums_arrays.tsv)
+# The file-level md5s are for byte-identical copies of our processed files and for the raw downloads.
+#
+# --- Raw downloads (scripts/data/download_*.sh) ---
+# rMD17 archive: figshare file 23950376 (rmd17.tar.bz2).  md5 as reported by the figshare API
+# (supplied_md5 == computed_md5); the extracted files below were hashed on our copy.
+cb1a927628d96f2e966025da4fb63d18  data/raw/rmd17.tar.bz2
+17fd6fb69066888613f7e16b358a7553  data/raw/rmd17/npz_data/rmd17_aspirin.npz
+be79df918468eb3579aa73a0becf7390  data/raw/rmd17/npz_data/rmd17_azobenzene.npz
+18c9242bc90fbf28215f6dd81e650f16  data/raw/rmd17/npz_data/rmd17_benzene.npz
+eb837fb8deb27d4e0d52f71a03aff776  data/raw/rmd17/npz_data/rmd17_ethanol.npz
+cdc1d70c0c34062ddde6e5071eb6fe21  data/raw/rmd17/npz_data/rmd17_malonaldehyde.npz
+0efba19c9907e3852318b1e6008b3b9e  data/raw/rmd17/npz_data/rmd17_naphthalene.npz
+ba10784f7b67635427085f6d7ec2dd97  data/raw/rmd17/npz_data/rmd17_paracetamol.npz
+900fedf242da438400fa4293348d7dd1  data/raw/rmd17/npz_data/rmd17_salicylic.npz
+0f2913d51f8149c90ab28d697a076f64  data/raw/rmd17/npz_data/rmd17_toluene.npz
+992a4479c28a07e0cce6da964805be31  data/raw/rmd17/npz_data/rmd17_uracil.npz
+124c8a0849e84e244d6ce8424e1c05cf  data/raw/rmd17/splits/index_test_01.csv
+22264dcf2e42d6133362411abbbe4ce8  data/raw/rmd17/splits/index_train_01.csv
+43261f58a24ca5a54aa6b8ab4947a8d2  data/raw/md22/md22_AT-AT-CG-CG.npz
+1b73fd567f84c5bdd58a4c1f382c0b7b  data/raw/md22/md22_AT-AT.npz
+f130a28fe97a49c4c0d535e58b7fb4d8  data/raw/md22/md22_Ac-Ala3-NHMe.npz
+cbb86fed19f6d2698f41be5c90f86047  data/raw/md22/md22_DHA.npz
+d010c8c076e7f11d20e7477f193458ac  data/raw/md22/md22_buckyball-catcher.npz
+5ca2b6fe68ebdf3b6e382727448424af  data/raw/md22/md22_double-walled_nanotube.npz
+7b3798cec7d6729c50ae6b9d963cd817  data/raw/md22/md22_stachyose.npz
+882f32ecdfaf0065025f0f3cd8010d86  data/raw/spice_maceoff/train_large_neut_no_bad_clean.tar.gz
+bf1f7c7ff1714e6ac6af2cdc642a130a  data/raw/spice_maceoff/test_large_neut_all.tar.gz
+#
+# --- Processed NPZs (scripts/data/prepare_*.py), as used for training/evaluation ---
+# rMD17: 950 train / 50 val / 1000 test (official split 01; val carved with RandomState(0)).
+cdec8e93ef1881b23d8cbced44babe4d  data/rmd17/aspirin_test_default.npz
+6e5a033a969eb3e9b8585b1848449e74  data/rmd17/aspirin_train_default.npz
+40752d3d61497010190280fafc940b59  data/rmd17/aspirin_val_default.npz
+3dd649e90577cfbd3d564fdafd560799  data/rmd17/azobenzene_test_default.npz
+65ec72fb74a74808845d8af3a38fe2bc  data/rmd17/azobenzene_train_default.npz
+5118853d6d068e6bdb6477c9349392f0  data/rmd17/azobenzene_val_default.npz
+0a1943582bdaba1acaaf8eca72b073df  data/rmd17/benzene_test_default.npz
+f9a591f542e2c81fbec0453c3759dd4f  data/rmd17/benzene_train_default.npz
+e62cfce1f6c28ed2ab3c878c6dc82c6e  data/rmd17/benzene_val_default.npz
+2ad9444ed2b8d3cfb29a1c291e7c5de5  data/rmd17/ethanol_test_default.npz
+a554b40f823716f76cdbe77312870776  data/rmd17/ethanol_train_default.npz
+079c824741c35790966b5fdfec636121  data/rmd17/ethanol_val_default.npz
+4ab90311842d0b93c62d5bd17b207739  data/rmd17/malonaldehyde_test_default.npz
+69ff9459f518a39a630dad0c8831571c  data/rmd17/malonaldehyde_train_default.npz
+6fd9f5f4ddc2456591cab4a2b81ab41d  data/rmd17/malonaldehyde_val_default.npz
+cc163ebfe923df7767bc51812602f61a  data/rmd17/naphthalene_test_default.npz
+6604401861683f300684c374682ba2e5  data/rmd17/naphthalene_train_default.npz
+5a417311d46e9c081e3c26c7b00b42e1  data/rmd17/naphthalene_val_default.npz
+cf2ed008ce3f0f728262571cb16f66b4  data/rmd17/paracetamol_test_default.npz
+51b24b614f3f911b5e8308a63743aa8f  data/rmd17/paracetamol_train_default.npz
+5c394caeafa949be45ed9a3e291614b7  data/rmd17/paracetamol_val_default.npz
+c51bf11fba66a4778e7e2061e46ae0bb  data/rmd17/salicylic_test_default.npz
+8d490231bd98ff28201621bca18d7315  data/rmd17/salicylic_train_default.npz
+4dd04902f94601d30ce6ea9e37750230  data/rmd17/salicylic_val_default.npz
+5f1bf64153cfb7fafa3a318a19ad73a7  data/rmd17/toluene_test_default.npz
+8cddda977e6753d86b0f7c82ce2fe894  data/rmd17/toluene_train_default.npz
+ac433536709b7615b1a209bc465a3b3d  data/rmd17/toluene_val_default.npz
+a34a7ce42a37a0bff05f195ddd930268  data/rmd17/uracil_test_default.npz
+5cc1cb43aca779f0f0830dc4bc950ec0  data/rmd17/uracil_train_default.npz
+662e63974b6e69560309509b41151229  data/rmd17/uracil_val_default.npz
+# MD22: random split, RandomState(1), train/val sizes from AtomTrick/data/md22.py DEFAULT_SIZES.
+50c41c2cee72583fddcda2d1d2b565af  data/md22/AT-AT-CG-CG_test_default.npz
+46257855f7d6da2bd24c2813b7927681  data/md22/AT-AT-CG-CG_train_default.npz
+ee90f396183d13218529197b5bee926f  data/md22/AT-AT-CG-CG_val_default.npz
+00d6e4d6ed6a0712d90a55064a1e3faa  data/md22/AT-AT_test_default.npz
+85684371c4bfe0eed5018e0474d8bf67  data/md22/AT-AT_train_default.npz
+92609d4e0384f27336f97dad198b29c4  data/md22/AT-AT_val_default.npz
+19ab1165ff1e3a814a7d0ffd32c90a02  data/md22/Ac-Ala3-NHMe_test_default.npz
+4b25f012eaa620a34e854088cb4aefbb  data/md22/Ac-Ala3-NHMe_train_default.npz
+50901b1aa5004fd1ca504849b687070f  data/md22/Ac-Ala3-NHMe_val_default.npz
+20ab53dcc5f013f0e4c9d2a537a8d696  data/md22/DHA_test_default.npz
+3908af4b2fa69212e157ba76d67a613d  data/md22/DHA_train_default.npz
+29a78921e1446d2b8b7814cc9a439ebc  data/md22/DHA_val_default.npz
+ae26ffb8f04cdf874d9c87cab9c5fa66  data/md22/buckyball-catcher_test_default.npz
+e6971679b5a2ca68717ed51cba148910  data/md22/buckyball-catcher_train_default.npz
+fa801d3f63a9414b3b42818cb27e5d7a  data/md22/buckyball-catcher_val_default.npz
+cd8e1ef2ace83b7c24eef66e49d99da1  data/md22/double-walled_nanotube_test_default.npz
+5cf3f75b1c79b14090a072af1fecc4a0  data/md22/double-walled_nanotube_train_default.npz
+438097766e3402ddbbe82ed6ae00e8fd  data/md22/double-walled_nanotube_val_default.npz
+8e77863934cb9bdeb2feb8c7296d8184  data/md22/stachyose_test_default.npz
+c0f98a1f042f121fc9f5dbe5166c9d34  data/md22/stachyose_train_default.npz
+16a0178b4fc35f6d25c99ff009185938  data/md22/stachyose_val_default.npz
+# SPICE (MACE-OFF23 release): train 903,455 / val 47,550 (default_rng(42), val_frac 0.05),
+# test 50,195, test_f15 50,069 (MACE nonphysical-geometry filter).
+8ed32adbf960aba430f55fb07e99bff9  data/spice_maceoff/spice_maceoff_train.npz
+d2c31c30b4001d4f540259239643c09a  data/spice_maceoff/spice_maceoff_val.npz
+d080cf7acb77a6086907f9f4d0eb56f1  data/spice_maceoff/spice_maceoff_test.npz
+431ef51d2ad9f455722b34fe7662aa38  data/spice_maceoff/spice_maceoff_test_f15.npz

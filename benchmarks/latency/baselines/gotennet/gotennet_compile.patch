@@ -1,0 +1,53 @@
+diff --git a/gotennet/models/components/layers.py b/gotennet/models/components/layers.py
+index e37a804..08b6cfc 100644
+--- a/gotennet/models/components/layers.py
++++ b/gotennet/models/components/layers.py
+@@ -878,8 +878,12 @@ class Distance(nn.Module):
+ 
+         if self.loop:
+             mask = edge_index[0] != edge_index[1]
+-            edge_weight = torch.zeros(edge_vec.size(0), device=edge_vec.device, dtype=edge_vec.dtype)
+-            edge_weight[mask] = torch.norm(edge_vec[mask], dim=-1)
++            # Out-of-place form of the original boolean-mask assignment
++            #     edge_weight = torch.zeros(E); edge_weight[mask] = torch.norm(edge_vec[mask], dim=-1)
++            # (same values; the in-place masked assignment is not traceable by torch.compile --
++            # ATOMTRICK latency harness patch).
++            safe_vec = torch.where(mask.unsqueeze(-1), edge_vec, torch.ones_like(edge_vec))
++            edge_weight = torch.where(mask, torch.norm(safe_vec, dim=-1), torch.zeros_like(mask, dtype=edge_vec.dtype))
+         else:
+             edge_weight = torch.norm(edge_vec, dim=-1)
+ 
+diff --git a/gotennet/models/representation/gotennet.py b/gotennet/models/representation/gotennet.py
+index 678e3b4..7b4a0a4 100644
+--- a/gotennet/models/representation/gotennet.py
++++ b/gotennet/models/representation/gotennet.py
+@@ -980,8 +980,15 @@ class GotenNet(nn.Module):
+         h = self.node_init(atomic_numbers, h, edge_index, edge_diff, phi_r0_ij)
+         t_ij_init = self.edge_init(edge_index, phi_r0_ij, h)
+         mask = edge_index[0] != edge_index[1]
+-        r0_ij = torch.norm(edge_vec[mask], dim=1).unsqueeze(1)
+-        edge_vec[mask] = edge_vec[mask] / r0_ij
++        # Out-of-place form of the original boolean-mask assignment
++        #     r0_ij = torch.norm(edge_vec[mask], dim=1).unsqueeze(1)
++        #     edge_vec[mask] = edge_vec[mask] / r0_ij
++        # (same values on every masked row, no-op on self loops; the in-place masked
++        # assignment is not traceable by torch.compile -- ATOMTRICK latency harness patch).
++        mask_col = mask.unsqueeze(1)
++        safe_vec = torch.where(mask_col, edge_vec, torch.ones_like(edge_vec))
++        r0_ij = torch.norm(safe_vec, dim=1, keepdim=True)
++        edge_vec = torch.where(mask_col, edge_vec / r0_ij, edge_vec)
+ 
+         rl_ij = self.sphere(edge_vec)[:, 1:]
+ 
+@@ -994,7 +1001,10 @@ class GotenNet(nn.Module):
+ 
+         hs = h.shape
+         X = torch.zeros((hs[0], equi_dim, hs[1]), device=h.device)
+-        h.unsqueeze_(1)
++        # Out-of-place form of the original in-place `h.unsqueeze_(1)` (same tensor values; the
++        # in-place metadata change on a tensor saved for backward is rejected under
++        # torch.compile -- ATOMTRICK latency harness patch).
++        h = h.unsqueeze(1)
+         t_ij = t_ij_init
+         for _i, (gata, eqff) in enumerate(
+             zip(self.gata_list, self.eqff_list, strict=False)

@@ -1,0 +1,18 @@
+{
+ "model": "atomtrick",
+ "python": "3.11.15",
+ "torch": "2.5.1+cu121",
+ "torch_cuda": "12.1",
+ "cudnn": 90100,
+ "host": "<compute node>",
+ "import_ok": true,
+ "modules": {
+  "scipy": "1.17.1"
+ },
+ "float32_matmul_precision_after_import": "highest",
+ "cuda_matmul_allow_tf32": false,
+ "cudnn_allow_tf32": true,
+ "default_dtype": "torch.float32",
+ "cuda_available": true,
+ "gpu": "NVIDIA H100 80GB HBM3"
+}

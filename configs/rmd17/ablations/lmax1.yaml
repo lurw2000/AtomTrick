@@ -1,0 +1,13 @@
+# =====================================================================================
+# rMD17 ablation: maximum degree Lmax = 1 (paper model: Lmax 3).
+# =====================================================================================
+# Reproduces : the "L = 1" row of the paper's ablation table.  1,418,560 parameters.
+# Result     : test set, seed 42, mean over molecules: E 0.680 / F 3.270 vs paper model (seed 42)
+#              0.457 / 2.224 (E +48.9 % / F +47.1 %; worse on E for 9/10, on F for 10/10 molecules).
+# Hardware   : 1x L40S; 6.1 h (6.0-6.8 h) per molecule, median (range) over the 10 molecules.
+# Usage: python train.py --config configs/rmd17/atomtrick.yaml --config configs/rmd17/ablations/lmax1.yaml --molecule M --seed S
+#        (or: bash scripts/reproduce/rmd17_ablations.sh lmax1)
+# Override file: only the changed keys + experiment name; everything else comes from atomtrick.yaml.
+
+experiment: rmd17_lmax1
+irreps: 64x0e+64x1o

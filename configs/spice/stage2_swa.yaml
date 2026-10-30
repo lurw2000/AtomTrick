@@ -1,0 +1,38 @@
+# =====================================================================================
+# ATOMTRICK on SPICE (MACE-OFF23) -- stage 2 of 2: energy-weighted SWA stage.
+# Override file: apply after configs/spice/stage1_force.yaml.
+# =====================================================================================
+# Reproduces : the SPICE model of the comparison with MACE-OFF23 S/M/L, reported on the
+#              force-filtered test set only (spice_maceoff_test_f15.npz, 50,069 structures);
+#              per-subset numbers via evaluate.py --per_subset.  The reported checkpoint is this
+#              run's *_best.pt.
+# Mechanics  : resumes from the stage-1 900k *_final.pt.  At step swa_start the trainer switches the
+#              loss to swa_rho_force, resets the LR to swa_lr with a fresh plateau scheduler, and
+#              replaces the EMA with a UNIFORM running average of the weights (SWA).  *_best.pt =
+#              that average at the lowest of the eight stage-2 validation losses (902,500 ...
+#              920,000 every 2,500 steps); the reported model is the average at step 907,500.
+#              swa_start is 900,001: the first stage-2 step still uses the stage-1 settings (the
+#              trainer also accepts 900,000).
+# Result     : seed 42, filtered test set, pooled over all 50,069 structures: E MAE 0.356 meV/atom
+#              (RMSE 1.219), F MAE 7.438 meV/A (RMSE 22.608); lower than MACE-OFF23-S/M/L in all
+#              28 subset cells (7 subsets x E MAE, E RMSE, F MAE, F RMSE).  Per subset, E / F MAE:
+#                PubChem 0.367 / 7.988      DES370K Monomers 0.264 / 3.985   DES370K Dimers 0.347 / 4.625
+#                Dipeptides 0.200 / 6.138   Solvated Amino Acids 0.472 / 14.938
+#                Water 0.510 / 10.745       QMugs 0.235 / 8.730
+# Hardware   : 1x H200 141 GB, 2.4 h; whole SPICE pipeline ~102 H200-h.  Test evaluation 13 min on
+#              1x L40S.
+# Caveats    : * Results are reported on the force-filtered test set only: 126 PubChem structures
+#                removed by the thresholds MACE-OFF applies when cleaning its SPICE 2 training data
+#                (max per-atom |F| <= 15 eV/A, |sum F| <= 0.1 eV/A), applied by us to the test file.
+#                MACE-OFF23 do not document test filtering and their per-subset counts match neither
+#                file.  scripts/reproduce/spice.sh evaluates only the filtered file.
+#
+# Usage:  python train.py --config configs/spice/stage1_force.yaml --config configs/spice/stage2_swa.yaml
+#         (or scripts/reproduce/spice.sh)
+
+experiment: spice_stage2_swa
+resume: "runs/spice_stage1_force/s{seed}/spice_stage1_force_s{seed}_final.pt"
+max_iterations: 920000
+swa_start: 900001
+swa_rho_force: 0.1
+swa_lr: 2.0e-5

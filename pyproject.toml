@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atomtrick"
+version = "1.0.0"
+description = "ATOMTRICK: an O(3)-equivariant machine-learned force field with learned O(2)-linear edge projections"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{ name = "The ATOMTRICK Authors" }]
+keywords = ["machine-learned force field", "equivariant neural network", "molecular dynamics", "O(3)"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+# Tested with torch 2.5.1 (CUDA 12.1 wheels); requirements.txt pins the environment
+# of the reported runs.
+dependencies = [
+    "torch>=2.5",
+    "numpy",
+    "scipy",
+    "ase",
+    "pandas",
+    "pyyaml",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+wandb = ["wandb"]
+md = ["openmm==8.5.2", "matplotlib"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["AtomTrick*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = [
+    # torch.load(weights_only=False) is used deliberately for full training checkpoints
+    "ignore:You are using `torch.load` with `weights_only=False`:FutureWarning",
+]

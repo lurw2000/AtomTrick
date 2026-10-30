@@ -1,0 +1,64 @@
+# ---------------------------------------------------------------------------
+# Python / tooling
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+.nfs*
+
+# ---------------------------------------------------------------------------
+# Data, run outputs and weights (large and regenerable; no checkpoints are released)
+# ---------------------------------------------------------------------------
+/data/
+/runs/
+/checkpoints/
+/wandb/
+wandb/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.model
+
+# Raw dataset formats
+*.npz
+*.npy
+*.hdf5
+*.h5
+*.xyz
+*.extxyz
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Logs, scheduler output, local settings and generated tables
+*.log
+*.out
+*.err
+/logs/
+/results/
+/slurm/
+
+# Compiler / Inductor / Triton caches
+.cache/
+.triton/
+torchinductor_*/
+**/torchinductor_cache/
+**/triton_cache/
+
+# ---------------------------------------------------------------------------
+# Keep: small files that ARE part of the release even though a pattern above
+# would match them (benchmark / MD result tables and the short MD trajectories).
+# ---------------------------------------------------------------------------
+!benchmarks/latency/results/
+!benchmarks/latency/results/**
+!md/results/
+!md/results/**
+!md/**/*.npz
+/scripts/container/

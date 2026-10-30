@@ -1,0 +1,14 @@
+# =====================================================================================
+# rMD17 ablation: 12 interaction layers (paper model: 6).
+# =====================================================================================
+# Reproduces : the "12 layers" row of the paper's ablation table.  7,371,840 parameters.
+# Result     : test set, seed 42, mean over molecules: E 0.415 / F 2.080 vs paper model (seed 42)
+#              0.457 / 2.224 (E -9.2 % / F -6.4 %; better on E and F for 10/10 molecules).
+# Hardware   : 1x L40S; 17.3 h (17.1-19.1 h) per molecule, median (range) over the 10 molecules
+#              (paper model at 6 layers: median 9.5 h).
+# Usage: python train.py --config configs/rmd17/atomtrick.yaml --config configs/rmd17/ablations/layers12.yaml --molecule M --seed S
+#        (or: bash scripts/reproduce/rmd17_ablations.sh layers12)
+# Override file: only the changed keys + experiment name; everything else comes from atomtrick.yaml.
+
+experiment: rmd17_layers12
+n_layers: 12

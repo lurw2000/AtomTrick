@@ -1,0 +1,26 @@
+# Exact package versions of the environment of the reported ATOMTRICK runs (Python 3.11,
+# CUDA 12.1 wheels).
+#
+#   python -m venv .venv && . .venv/bin/activate      # Python 3.11
+#   pip install -r requirements.txt
+#   pip install -e .                                   # the AtomTrick package itself
+#
+# Other CUDA versions: install the matching torch 2.5.1 wheel from
+# https://pytorch.org/get-started/previous-versions/ first, then the rest.
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.5.1+cu121
+triton==3.1.0
+numpy==2.4.4
+scipy==1.17.1
+ase==3.28.0
+pandas==3.0.2
+PyYAML==6.0.3
+tqdm==4.67.3
+
+# Tests
+pytest
+
+# Optional extras (uncomment as needed)
+# wandb==0.26.1          # --wandb_project logging
+# openmm==8.5.2          # md/ (OpenMM molecular dynamics)
+# matplotlib==3.10.8     # md/ and benchmarks/ plots

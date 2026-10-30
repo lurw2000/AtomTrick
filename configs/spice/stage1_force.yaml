@@ -1,0 +1,91 @@
+# =====================================================================================
+# ATOMTRICK on SPICE (MACE-OFF23 train/test release) -- stage 1 of 2 (force-weighted training).
+# Base config: every key explicit.  Same architecture as the rMD17/MD22 model.
+# =====================================================================================
+# Reproduces : stage 1 of the SPICE model in the comparison with MACE-OFF23 S/M/L
+#              (7 subsets, E meV/atom, F meV/A; reported on the force-filtered test set only).
+#              The reported checkpoint is produced by stage 2 (configs/spice/stage2_swa.yaml),
+#              which resumes from this run's *_final.pt.
+#              Batch-size, iteration, atomic-reference and worker settings differ from rMD17/MD22;
+#              everything else matches.  This file encodes the whole 900k-step schedule;
+#              scripts/reproduce/spice.sh runs it as a chain of resumed segments by default
+#              (SPICE_CHAIN="300000 600000 900000", so that each job fits a cluster wall-time
+#              limit); one continuous run is equivalent up to data order (the loader RNG is not
+#              restored on resume).
+# Hardware   : 1x H200 141 GB, 16 CPUs, 200 GB host RAM.  99.9 h in three jobs (two restarts from
+#              the rolling checkpoint, ~1 h of repeated steps); ~33 h per 300k steps uninterrupted.
+# Caveats    : * Atomic reference energies are least-squares fitted on the training set
+#                (fit_atomic_refs), not MACE-OFF23's isolated-atom E0s.
+#              * Validation = a structure-level random 5% of MACE-OFF23's training file (seed 42);
+#                MACE-OFF23 did not publish its validation split.
+#              * Variable atom count: make_fx runs with duck-shaping ON (makefx_duckoff off).
+#
+# Usage:  python train.py --config configs/spice/stage1_force.yaml
+#         (or scripts/reproduce/spice.sh for both stages + evaluation)
+# Deliberately absent: raw_data_dir / dataset / processed_dir / split_id and retired no-op flags.
+
+# ---- run identity / I/O -------------------------------------------------------------
+experiment: spice_stage1_force
+seed: 42                             # reported runs: 42 only
+out_dir: "runs/{experiment}/s{seed}"
+wandb_name: "{experiment}_s{seed}"   # also the checkpoint file stem
+wandb_project: null                  # W&B off; pass --wandb_project NAME to log
+log_level: INFO
+save_every: 10000
+resume: null
+device: null                         # auto (cuda:0 if available)
+
+# ---- data ---------------------------------------------------------------------------
+data: data/spice_maceoff/spice_maceoff_train.npz   # 903,455 structures
+val_data: data/spice_maceoff/spice_maceoff_val.npz # 47,550 structures
+val_split: 0.0
+test_data: null                      # test is scored afterwards by evaluate.py on *_best.pt
+num_workers: 8
+
+# ---- model (3,730,368 parameters) ---------------------------------------------------
+irreps: 64x0e+64x1o+64x2e+64x3o      # Lmax 3, 64 channels per degree
+n_layers: 6
+n_heads: 8
+ff_mult: 4
+max_z: 100
+ffn_act_mode: gate
+attn_nonlin: identity                # unnormalised attention weights <q,k>/sqrt(d)
+layernorm_mode: shared               # centre l=0, one RMS over all degrees
+escn_frame: polefree                 # pole-free edge-frame Wigner-D (euler = direct Euler-angle evaluation, same function)
+kv_mode: o2                          # shorthand for k_mode + v_mode (both explicit below)
+k_mode: o2                           # learned O(2)-linear edge projections for keys ...
+v_mode: o2                           # ... and values
+radial_mode: gate
+rbf_type: expnorm
+num_radial_basis: 32
+radial_hidden: 256
+cutoff: 5.0
+edge_cutoff: 5.0
+max_neighbors: 0                     # keep all neighbours within edge_cutoff
+energy_hidden: 256
+dtype: float32
+matmul_precision: highest            # full fp32 matmuls (high = TF32)
+
+# ---- compile path -------------------------------------------------------------------
+makefx: "auto"                       # auto = on iff CUDA is available (reported runs: on)
+makefx_duckoff: "off"                # variable atom count -> duck-shaping on (published)
+
+# ---- optimisation -------------------------------------------------------------------
+optimizer: adamw
+lr: 2.0e-4
+weight_decay: 0.0
+max_iterations: 900000               # run as 300k -> 600k -> 900k (see header)
+batch_size: 128
+eval_batch_size: 128                 # must be <= batch_size on the make_fx path
+grad_clip: 10.0
+rho_force: 0.999                     # loss = rho*MSE(F) + (1-rho)*MSE(E)
+fit_atomic_refs: true                # LSQ-fit per-element reference energies on train
+warmup_steps: 10000
+eval_every: 2500
+scheduler_patience: 3                # ReduceLROnPlateau on val loss: 3 evals = 7,500 steps
+scheduler_factor: 0.8
+scheduler_min_lr: 1.0e-7
+ema_decay: 0.99                      # EMA weights are validated and saved as *_best.pt
+swa_start: 0                         # SWA stage is stage 2 (stage2_swa.yaml)
+swa_rho_force: 0.1                   # unused (swa_start 0)
+swa_lr: 0.0                          # unused (swa_start 0)

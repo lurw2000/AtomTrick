@@ -1,0 +1,16 @@
+diff --git a/nets/__init__.py b/nets/__init__.py
+index 6ef0467..ec42f81 100755
+--- a/nets/__init__.py
++++ b/nets/__init__.py
+@@ -2,10 +2,5 @@ from .registry import model_entrypoint
+ 
+ from .graph_attention_transformer import *
+ from .graph_attention_transformer_md17 import *
+-from .graph_attention_transformer_oc20 import *
+-
+-from .dp_attention_transformer import *
+-from .dp_attention_transformer_md17 import *
+-from .dp_attention_transformer_oc20 import *
+ 
+ from .equiformer_md17_dens import *
+\ No newline at end of file

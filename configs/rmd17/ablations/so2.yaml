@@ -1,0 +1,19 @@
+# =====================================================================================
+# rMD17 ablation: SO(2)-linear instead of O(2)-linear key/value edge projections.
+# =====================================================================================
+# Reproduces : the paper's main ablation, O(2) vs SO(2) (SO(2) column; O(2) side = atomtrick.yaml),
+#              seeds 42, 1, 2.  4,418,496 parameters (SO(2) blocks add the antisymmetric
+#              [[P,-Q],[Q,P]] half; channel widths unchanged).
+# Result     : test set, 3-seed mean over molecules: E 0.666 / F 3.159 vs O(2) 0.448 / 2.227
+#              (E +48.7 % / F +41.8 %; worse on E and F for 10/10 molecules).
+# Hardware   : 1x L40S (larger make_fx graph than O(2)): 10.7-15.6 h per molecule and seed,
+#              median 10.9 h (~19 steps/s vs ~23 for O(2)); 30 runs 337 GPU-h.
+# Caveats    : parameter counts are not matched (4,418,496 vs 3,730,368).
+# Usage: python train.py --config configs/rmd17/atomtrick.yaml --config configs/rmd17/ablations/so2.yaml --molecule M --seed S
+#        (or: bash scripts/reproduce/rmd17_ablations.sh so2)
+# Override file: only the changed keys + experiment name; everything else comes from atomtrick.yaml.
+
+experiment: rmd17_so2
+kv_mode: so2
+k_mode: so2
+v_mode: so2

@@ -1,0 +1,144 @@
+{
+ "problems": [
+  "results come from 2 jobs / 2 GPUs (['20320246', '20396545'], ['GPU-215d43ec-3ba2-b8cc-e123-cb7caa323c05', 'GPU-8d1cc5ff-05d8-1a4c-b7fe-a57ec51415a9']): not one session -- re-run with FORCE=1"
+ ],
+ "warnings": [
+  "equiformer compiled (fused): 3 ok rows with graph breaks during the warm-up (compile_graph_breaks > 0): the fused recipe did not give ONE graph there (outputs still matched eager): rmd17/ethanol bs1, rmd17/ethanol bs4, md22/Ac_Ala3_NHMe bs1",
+  "equiformer_v2 compiled (fused): 1 ok rows with graph breaks during the warm-up (compile_graph_breaks > 0): the fused recipe did not give ONE graph there (outputs still matched eager): rmd17/ethanol bs1",
+  "equiformer_v2 compiled (inductor): 4 ok rows compiled no new graph and are SLOWER than the eager row (possible eager fallback for that shape): rmd17/malonaldehyde bs1, rmd17/malonaldehyde bs4, rmd17/uracil bs1, rmd17/uracil bs4",
+  "gotennet compiled (fused): 4 ok rows with graph breaks during the warm-up (compile_graph_breaks > 0): the fused recipe did not give ONE graph there (outputs still matched eager): rmd17/ethanol bs1, rmd17/ethanol bs4, md22/Ac_Ala3_NHMe bs1, md22/Ac_Ala3_NHMe bs4"
+ ],
+ "gpus": [
+  "NVIDIA H100 80GB HBM3"
+ ],
+ "jobs": [
+  "20320246",
+  "20396545"
+ ],
+ "gpu_uuids": [
+  "GPU-215d43ec-3ba2-b8cc-e123-cb7caa323c05",
+  "GPU-8d1cc5ff-05d8-1a4c-b7fe-a57ec51415a9"
+ ],
+ "envs": {
+  "atomtrick": {
+   "model": "atomtrick",
+   "python": "3.11.15",
+   "torch": "2.5.1+cu121",
+   "torch_cuda": "12.1",
+   "cudnn": 90100,
+   "host": "<compute node>",
+   "import_ok": true,
+   "modules": {
+    "scipy": "1.17.1"
+   },
+   "float32_matmul_precision_after_import": "highest",
+   "cuda_matmul_allow_tf32": false,
+   "cudnn_allow_tf32": true,
+   "default_dtype": "torch.float32",
+   "cuda_available": true,
+   "gpu": "NVIDIA H100 80GB HBM3"
+  },
+  "equiformer": {
+   "model": "equiformer",
+   "python": "3.10.20",
+   "torch": "2.5.1+cu124",
+   "torch_cuda": "12.4",
+   "cudnn": 90100,
+   "host": "<compute node>",
+   "import_ok": true,
+   "modules": {
+    "torch_geometric": "2.7.0",
+    "torch_cluster": "1.6.3+pt25cu124",
+    "e3nn": "0.5.1"
+   },
+   "float32_matmul_precision_after_import": "highest",
+   "cuda_matmul_allow_tf32": false,
+   "cudnn_allow_tf32": true,
+   "default_dtype": "torch.float32",
+   "cuda_available": true,
+   "gpu": "NVIDIA H100 80GB HBM3"
+  },
+  "equiformer_v2": {
+   "model": "equiformer_v2",
+   "python": "3.10.20",
+   "torch": "2.5.1+cu124",
+   "torch_cuda": "12.4",
+   "cudnn": 90100,
+   "host": "<compute node>",
+   "import_ok": true,
+   "modules": {
+    "torch_geometric": "2.7.0",
+    "torch_cluster": "1.6.3+pt25cu124",
+    "e3nn": "0.5.1"
+   },
+   "float32_matmul_precision_after_import": "highest",
+   "cuda_matmul_allow_tf32": false,
+   "cudnn_allow_tf32": true,
+   "default_dtype": "torch.float32",
+   "cuda_available": true,
+   "gpu": "NVIDIA H100 80GB HBM3"
+  },
+  "gotennet": {
+   "model": "gotennet",
+   "python": "3.10.20",
+   "torch": "2.5.1+cu124",
+   "torch_cuda": "12.4",
+   "cudnn": 90100,
+   "host": "<compute node>",
+   "import_ok": true,
+   "modules": {
+    "hydra": "1.3.2",
+    "torch_geometric": "2.7.0",
+    "torch_cluster": "1.6.3+pt25cu124"
+   },
+   "float32_matmul_precision_after_import": "highest",
+   "cuda_matmul_allow_tf32": false,
+   "cudnn_allow_tf32": true,
+   "default_dtype": "torch.float32",
+   "cuda_available": true,
+   "gpu": "NVIDIA H100 80GB HBM3"
+  },
+  "mace": {
+   "model": "mace",
+   "python": "3.11.17",
+   "torch": "2.5.1+cu121",
+   "torch_cuda": "12.1",
+   "cudnn": 90100,
+   "host": "<compute node>",
+   "import_ok": true,
+   "modules": {
+    "mace": "0.3.15",
+    "e3nn": "0.4.4",
+    "ase": "3.29.0",
+    "mace_file": "<MACE_ROOT>/mace/__init__.py"
+   },
+   "float32_matmul_precision_after_import": "highest",
+   "cuda_matmul_allow_tf32": false,
+   "cudnn_allow_tf32": true,
+   "default_dtype": "torch.float32",
+   "cuda_available": true,
+   "gpu": "NVIDIA H100 80GB HBM3"
+  },
+  "mace_compiled": {
+   "model": "mace",
+   "python": "3.11.17",
+   "torch": "2.5.1+cu121",
+   "torch_cuda": "12.1",
+   "cudnn": 90100,
+   "host": "<compute node>",
+   "import_ok": true,
+   "modules": {
+    "mace": "0.3.15",
+    "e3nn": "0.4.4",
+    "ase": "3.29.0",
+    "mace_file": "<MACE_ROOT>/mace/__init__.py"
+   },
+   "float32_matmul_precision_after_import": "highest",
+   "cuda_matmul_allow_tf32": false,
+   "cudnn_allow_tf32": true,
+   "default_dtype": "torch.float32",
+   "cuda_available": true,
+   "gpu": "NVIDIA H100 80GB HBM3"
+  }
+ }
+}

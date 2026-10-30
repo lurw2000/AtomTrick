@@ -1,0 +1,14 @@
+# =====================================================================================
+# rMD17 ablation: softmax-normalised attention weights (paper model: unnormalised "identity").
+# =====================================================================================
+# Reproduces : the softmax-attention row of the paper's ablation table (seed 42).  3,730,368 parameters.
+# Result     : test set, seed 42, mean over molecules: E 1.137 / F 2.433 vs identity (paper model,
+#              seed 42) 0.457 / 2.224 (E +149.0 % / F +9.4 %; worse on E for 9/10, on F for 10/10
+#              molecules).
+# Hardware   : 1x L40S; 9.5 h (9.3-11.0 h) per molecule, median (range) over the 10 molecules.
+# Usage: python train.py --config configs/rmd17/atomtrick.yaml --config configs/rmd17/ablations/softmax.yaml --molecule M --seed S
+#        (or: bash scripts/reproduce/rmd17_ablations.sh softmax)
+# Override file: only the changed keys + experiment name; everything else comes from atomtrick.yaml.
+
+experiment: rmd17_softmax
+attn_nonlin: softmax

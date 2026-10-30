@@ -1,0 +1,4 @@
+# Config override for run_all.sh's extra step: the direct Euler-angle evaluation of the eSCN edge
+# frame, timed against the default pole-free evaluation (the ratio quoted in the paper's latency
+# appendix).  Passed after configs/rmd17/atomtrick.yaml (later --config wins).
+escn_frame: euler

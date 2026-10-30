@@ -1,0 +1,36 @@
+gpu_selected=0 CUDA_DEVICE_ORDER=PCI_BUS_ID
+date_utc=2026-10-20T03:46:59Z
+slurm_job_id=20320246 node=<compute node>
+repo head=722dd5f4295e1dd99552c76e87126ab89cd6f111 dirty=0
+clone_EQUIFORMER_ROOT=64cb7866f48b9aa156e74a9d6a2ef2663b367437 dirty_files= M nets/__init__.py 
+clone_EQUIFORMER_V2_ROOT=d5ad4be729b56f74012ebb7f097f77c5b00a1004 dirty_files=
+clone_GOTENNET_ROOT=28bb3eab4fff1c45bb527abbbf1704d52bdcbd97 dirty_files= M gotennet/models/components/layers.py  M gotennet/models/representation/gotennet.py 
+clone_MACE_ROOT=76c9d2661a6c4f3afd9b047315d0c56ae810e61c dirty_files= M scripts_bench/benchmark_inference_mace.py 
+harness_sha256 baf5e58037c6dac045925c24f9aaa6b7d22f3b5704f6f5874b069884c2e32fc1  latency_common.py
+harness_sha256 c5f9e59bf35acfa9172d1115c689da39c86bed904747e549f541cd6815c9663b  equiformer/benchmark_inference.py
+harness_sha256 e0afdac19ca9dd87fdb35722d01b6b94d27ded6e8dfee9269e36a497bc0dd27a  equiformer_v2/benchmark_inference.py
+harness_sha256 914585820b9bc2f5488c761a2771bb97e907d20be0ad188b9c52b88f623b1b7d  gotennet/benchmark_inference.py
+harness_sha256 75881c8b297d6eab8c57ce306a93d0948fa8dfb0053b74f79522c8ba9f567951  mace/benchmark_inference_mace.py
+bench_atomtrick_sha256 f275a7ae3bb50e24093bb53565f24f394ea13652f66eb1f3f33a6f1d513e5d0c  benchmarks/latency/bench_atomtrick.py
+cpu=AMD EPYC 9454 48-Core Processor cpus_allowed=8
+name, uuid, pci.bus_id, driver_version, memory.total [MiB], clocks.max.sm [MHz], clocks.max.memory [MHz], power.limit [W], compute_mode, persistence_mode
+NVIDIA H100 80GB HBM3, GPU-215d43ec-3ba2-b8cc-e123-cb7caa323c05, 00000000:26:00.0, 610.43.02, 81559 MiB, 1980 MHz, 2619 MHz, 700.00 W, Default, Enabled
+env: PYTORCH_JIT=unset PYTORCH_CUDA_ALLOC_CONF=unset CUDA_VISIBLE_DEVICES=0
+gpu_selected=0 CUDA_DEVICE_ORDER=PCI_BUS_ID
+date_utc=2026-10-20T05:33:43Z
+slurm_job_id=20396545 node=<compute node>
+repo head=b4c4178e78f9ea735a40cecb61380b0496491679 dirty=0
+clone_EQUIFORMER_ROOT=64cb7866f48b9aa156e74a9d6a2ef2663b367437 dirty_files= M nets/__init__.py 
+clone_EQUIFORMER_V2_ROOT=d5ad4be729b56f74012ebb7f097f77c5b00a1004 dirty_files=
+clone_GOTENNET_ROOT=28bb3eab4fff1c45bb527abbbf1704d52bdcbd97 dirty_files= M gotennet/models/components/layers.py  M gotennet/models/representation/gotennet.py 
+clone_MACE_ROOT=76c9d2661a6c4f3afd9b047315d0c56ae810e61c dirty_files= M scripts_bench/benchmark_inference_mace.py 
+harness_sha256 baf5e58037c6dac045925c24f9aaa6b7d22f3b5704f6f5874b069884c2e32fc1  latency_common.py
+harness_sha256 da6246ca7f4cba6d70369cff3a73e1c5a4117261ae640eca1f9b91687b436cdc  equiformer/benchmark_inference.py
+harness_sha256 d65638410693fc8bf51ab5f0fb2222c585a844fc10c84c561b219da0bdd820bc  equiformer_v2/benchmark_inference.py
+harness_sha256 33e9a32f1861a631f18746473419d4634ac3d85de05fd70920e0a3784cf0d040  gotennet/benchmark_inference.py
+harness_sha256 c90db920d18d167f427f7a887da74c74e4761bc5f9287b6b45a563b8d91b25e4  mace/benchmark_inference_mace.py
+bench_atomtrick_sha256 f275a7ae3bb50e24093bb53565f24f394ea13652f66eb1f3f33a6f1d513e5d0c  benchmarks/latency/bench_atomtrick.py
+cpu=AMD EPYC 9454 48-Core Processor cpus_allowed=8
+name, uuid, pci.bus_id, driver_version, memory.total [MiB], clocks.max.sm [MHz], clocks.max.memory [MHz], power.limit [W], compute_mode, persistence_mode
+NVIDIA H100 80GB HBM3, GPU-8d1cc5ff-05d8-1a4c-b7fe-a57ec51415a9, 00000000:06:00.0, 610.43.02, 81559 MiB, 1980 MHz, 2619 MHz, 700.00 W, Default, Enabled
+env: PYTORCH_JIT=unset PYTORCH_CUDA_ALLOC_CONF=unset CUDA_VISIBLE_DEVICES=0

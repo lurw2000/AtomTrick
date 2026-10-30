@@ -1,0 +1,381 @@
+diff --git a/gotennet/configs/callbacks/default.yaml b/gotennet/configs/callbacks/default.yaml
+index 4445aa8..23bd977 100644
+--- a/gotennet/configs/callbacks/default.yaml
++++ b/gotennet/configs/callbacks/default.yaml
+@@ -17,12 +17,12 @@ early_stopping:
+   min_delta: 1e-6 # minimum change in the monitored metric needed to qualify as an improvement
+ 
+ model_summary:
+-  _target_: pytorch_lightning.callbacks.RichModelSummary
++  _target_: pytorch_lightning.callbacks.ModelSummary
+   max_depth: 5
+ 
+-rich_progress_bar:
+-  _target_: pytorch_lightning.callbacks.RichProgressBar
+-  refresh_rate: 1
++progress_bar:
++  _target_: pytorch_lightning.callbacks.TQDMProgressBar
++  refresh_rate: 50
+ 
+ learning_rate_monitor:
+   _target_: pytorch_lightning.callbacks.LearningRateMonitor
+diff --git a/gotennet/configs/datamodule/md22.yaml b/gotennet/configs/datamodule/md22.yaml
+new file mode 100644
+index 0000000..2947a59
+--- /dev/null
++++ b/gotennet/configs/datamodule/md22.yaml
+@@ -0,0 +1,32 @@
++_target_: gotennet.datamodules.datamodule.DataModule
++
++hparams:
++  dataset: MD22
++  dataset_arg:
++  dataset_root: ${paths.data_dir} # data_path is specified in config.yaml
++  derivative: true
++  split_mode: null
++  reload: 0
++  batch_size: 4
++  inference_batch_size: 16
++  standardize: true
++  splits: null
++  # train_size / val_size / test_size are set per-molecule by the experiment config.
++  # MD22 has no official split files; reproducibility = fixed seed + fixed sizes.
++  train_size: null
++  val_size: null
++  test_size: null
++  num_workers: 8
++  seed: 1
++  output_dir: ${paths.output_dir}
++  ngpus: 1
++  num_nodes: 1
++  precision: 32
++  task: train
++  distributed_backend: ddp
++  redirect: false
++  accelerator: gpu
++  test_interval: 1500
++  save_interval: 1
++  prior_model: null
++  normalize_positions: false
+diff --git a/gotennet/configs/datamodule/rmd17.yaml b/gotennet/configs/datamodule/rmd17.yaml
+index 598425d..01bfd16 100644
+--- a/gotennet/configs/datamodule/rmd17.yaml
++++ b/gotennet/configs/datamodule/rmd17.yaml
+@@ -3,7 +3,7 @@ _target_: gotennet.datamodules.datamodule.DataModule
+ hparams:
+   dataset: rMD17
+   dataset_arg:
+-  dataset_root: ${paths.data_dir}/rmd17 # data_path is specified in config.yaml
++  dataset_root: ${paths.data_dir} # data_path is specified in config.yaml
+ #  dataset_arg: energy_U0
+   derivative: true
+   split_mode: null
+@@ -15,7 +15,7 @@ hparams:
+   train_size: 950
+   val_size: 50
+   test_size: null
+-  num_workers: 12
++  num_workers: 8
+   seed: 1
+   output_dir: ${paths.output_dir}
+   ngpus: 1
+diff --git a/gotennet/configs/experiment/md22_at_at.yaml b/gotennet/configs/experiment/md22_at_at.yaml
+new file mode 100644
+index 0000000..bfcfc9e
+--- /dev/null
++++ b/gotennet/configs/experiment/md22_at_at.yaml
+@@ -0,0 +1,82 @@
++# @package _global_
++
++# Reproduce-test experiment for MD22 on AT-AT.
++# Protocol follows the MACE / Equiformer-V2 / ViSNet convention:
++#   - seeded random split over the full trajectory
++#   - test = everything not in train/val
++#
++# Per-molecule train sizes (widely cited):
++#   Ac-Ala3-NHMe: 6000    DHA: 8000          stachyose: 8000
++#   AT-AT: 3000           AT-AT-CG-CG: 2000  buckyball-catcher: 600
++#   double-walled_nanotube: 800
++# val_size is commonly 500 (or 10% of train for the two smallest systems).
++#
++# To run:
++#   python gotennet/train.py experiment=md22_at_at
++#
++# To run other molecules, duplicate this file and change:
++#   dataset_arg, label, train_size, val_size.
++
++defaults:
++  - override /datamodule: md22.yaml
++  - override /model: gotennet.yaml
++  - override /callbacks: default.yaml
++  - override /logger: wandb.yaml
++  - override /trainer: default.yaml
++
++datamodule:
++  hparams:
++    seed: 1
++    standardize: true
++    splits: null
++    dataset_arg: AT_AT
++    train_size: 3000
++    val_size: 500
++    test_size: null  # = dataset_len - train - val; hold-out test
++    inference_batch_size: 4
++
++label: "AT_AT"
++model:
++  lr: 0.0001
++  lr_warmup_steps: 1000
++  lr_monitor: "validation/val_loss"
++  lr_minlr: 1.e-07
++  lr_patience: 30
++  weight_decay: 0.01
++  use_ema: True
++  task_config:
++    task_loss: "MSELoss"
++    ema_rates:
++        - 0.05
++        - 1.00
++    loss_weights:
++        - 0.05
++        - 0.95
++
++  representation:
++    n_interactions: 8
++    n_atom_basis: 384
++    radial_basis: "expnorm"
++    n_rbf: 32
++    edge_updates: "linw_mlpa"
++    lmax: 2
++    evec_dim: 768
++    emlp_dim: 768
++
++  output:
++    n_hidden: 256
++
++
++trainer:
++  max_epochs: 3000
++  inference_mode: False
++
++callbacks:
++  early_stopping:
++    monitor: "validation/val_loss_og"
++    patience: 1000
++  model_checkpoint:
++    monitor: "validation/val_loss_og"
++project: "gotennet_md22"
++
++task: "rMD17"
+diff --git a/gotennet/configs/experiment/rmd17_aspirin.yaml b/gotennet/configs/experiment/rmd17_aspirin.yaml
+index c94822b..ba99301 100644
+--- a/gotennet/configs/experiment/rmd17_aspirin.yaml
++++ b/gotennet/configs/experiment/rmd17_aspirin.yaml
+@@ -24,7 +24,7 @@ model:
+   lr_monitor: "validation/val_loss"
+   lr_minlr: 1.e-07
+   lr_patience: 30
+-  weight_decay: 0.0
++  weight_decay: 0.01
+   use_ema: True
+   task_config:
+     task_loss: "MSELoss"
+@@ -36,7 +36,7 @@ model:
+         - 0.95
+ 
+   representation:
+-    n_interactions: 16
++    n_interactions: 12
+     n_atom_basis: 192
+     radial_basis: "expnorm"
+     n_rbf: 32
+@@ -50,6 +50,7 @@ model:
+ 
+ 
+ trainer:
++  gradient_clip_val: 10
+   max_epochs: 3000
+   inference_mode: False
+ 
+diff --git a/gotennet/datamodules/components/md22.py b/gotennet/datamodules/components/md22.py
+new file mode 100644
+index 0000000..d58f15b
+--- /dev/null
++++ b/gotennet/datamodules/components/md22.py
+@@ -0,0 +1,94 @@
++import os.path as osp
++
++import numpy as np
++import torch
++from pytorch_lightning.utilities import rank_zero_warn
++from torch_geometric.data import Data, InMemoryDataset
++from tqdm import tqdm
++
++
++class MD22(InMemoryDataset):
++    """MD22 dataset loader.
++
++    Expects raw npz files at <root>/raw/md22/md22_<molecule>.npz, using the
++    sGDML key convention: z (n_atoms,), R (N, n_atoms, 3), E (N, 1 or N,),
++    F (N, n_atoms, 3).
++
++    MD22 ships WITHOUT official train/test split CSVs (unlike rMD17). The
++    accepted reproducibility protocol in the literature (sGDML, MACE,
++    Equiformer-V2, ViSNet) is a fixed-seed random split with fixed train/val
++    sizes per molecule; see configs/experiment/md22_*.yaml.
++    """
++
++    molecule_files = dict(
++        Ac_Ala3_NHMe='md22_Ac-Ala3-NHMe.npz',
++        AT_AT='md22_AT-AT.npz',
++        AT_AT_CG_CG='md22_AT-AT-CG-CG.npz',
++        DHA='md22_DHA.npz',
++        buckyball_catcher='md22_buckyball-catcher.npz',
++        double_walled_nanotube='md22_double-walled_nanotube.npz',
++        stachyose='md22_stachyose.npz',
++    )
++
++    available_molecules = list(molecule_files.keys())
++
++    def __init__(self, root, transform=None, pre_transform=None, dataset_arg=None):
++        assert dataset_arg is not None, (
++            "Please provide the desired comma-separated molecule(s) through "
++            f"'dataset_arg'. Available molecules are {', '.join(MD22.available_molecules)} "
++            "or 'all' to train on the combined dataset."
++        )
++
++        if dataset_arg == "all":
++            dataset_arg = ",".join(MD22.available_molecules)
++        self.molecules = dataset_arg.split(",")
++
++        if len(self.molecules) > 1:
++            rank_zero_warn(
++                "MD22 molecules have different reference energies, "
++                "which is not accounted for during training."
++            )
++
++        super(MD22, self).__init__(root, transform, pre_transform)
++
++        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
++
++    def len(self):
++        return self.data.y.size(0)
++
++    @property
++    def raw_file_names(self):
++        return [osp.join('md22', MD22.molecule_files[mol]) for mol in self.molecules]
++
++    @property
++    def processed_file_names(self):
++        return [f"md22-{mol}.pt" for mol in self.molecules]
++
++    def download(self):
++        raise RuntimeError(
++            f"MD22 raw files not found. Expected at {self.raw_paths}. "
++            "Download from http://www.sgdml.org/ and place under <root>/raw/md22/."
++        )
++
++    def process(self):
++        for path, processed_path in zip(self.raw_paths, self.processed_paths, strict=False):
++            data_npz = np.load(path)
++            z = torch.from_numpy(data_npz["z"]).long()
++            positions = torch.from_numpy(data_npz["R"]).float()
++            energies = torch.from_numpy(data_npz["E"]).float().reshape(-1, 1)
++            forces = torch.from_numpy(data_npz["F"]).float()
++
++            samples = []
++            for pos, y, dy in tqdm(zip(positions, energies, forces, strict=False), total=energies.size(0)):
++                data = Data(z=z, pos=pos, y=y.unsqueeze(1), dy=dy)
++
++                if self.pre_filter is not None:
++                    data = self.pre_filter(data)
++
++                if self.pre_transform is not None:
++                    data = self.pre_transform(data)
++
++                samples.append(data)
++
++            data, slices = self.collate(samples)
++            torch.save((data, slices), processed_path)
+diff --git a/gotennet/datamodules/datamodule.py b/gotennet/datamodules/datamodule.py
+index 9ed250b..123a5ac 100644
+--- a/gotennet/datamodules/datamodule.py
++++ b/gotennet/datamodules/datamodule.py
+@@ -10,6 +10,7 @@ from tqdm import tqdm
+ 
+ from gotennet import utils
+ 
++from .components.md22 import MD22
+ from .components.qm9 import QM9
+ from .components.rmd17 import rMD17
+ from .components.utils import MissingLabelException, make_splits
+@@ -302,6 +303,28 @@ class DataModule(LightningDataModule):
+ 
+         return idx_train, idx_val, idx_test
+ 
++    def _prepare_MD22(self):
++        """Load MD22 with a seeded random train/val/test split.
++
++        MD22 has no official split files. Reproducibility = same seed +
++        same train_size/val_size across runs. make_splits writes
++        splits.npz under output_dir so later runs can reuse the exact
++        indices via hparams.splits=<path>.
++        """
++        self.dataset = MD22(root=self.hparams["dataset_root"], dataset_arg=self.hparams["dataset_arg"])
++
++        idx_train, idx_val, idx_test = make_splits(
++            len(self.dataset),
++            self.hparams["train_size"],
++            self.hparams["val_size"],
++            self.hparams["test_size"],
++            self.hparams["seed"],
++            join(self.hparams["output_dir"], "splits.npz"),
++            self.hparams["splits"],
++        )
++
++        return idx_train, idx_val, idx_test
++
+     def _prepare_rMD17(self):
+         self.dataset = rMD17(root=self.hparams["dataset_root"], dataset_arg=self.hparams["dataset_arg"])
+ 
+diff --git a/gotennet/models/tasks/MDTask.py b/gotennet/models/tasks/MDTask.py
+index 4879863..1aef6be 100644
+--- a/gotennet/models/tasks/MDTask.py
++++ b/gotennet/models/tasks/MDTask.py
+@@ -11,6 +11,24 @@ from gotennet.models.components.outputs import AtomwiseV3
+ from gotennet.models.tasks.Task import Task
+ 
+ 
++class MeanL2Error(torchmetrics.Metric):
++    """Mean per-atom L2 norm of the force error: mean(||F_pred - F_true||_2)."""
++
++    def __init__(self, **kwargs):
++        super().__init__(**kwargs)
++        self.add_state("sum_l2", default=torch.tensor(0.0), dist_reduce_fx="sum")
++        self.add_state("count", default=torch.tensor(0), dist_reduce_fx="sum")
++
++    def update(self, preds: torch.Tensor, target: torch.Tensor):
++        # preds, target: [n_atoms, 3]
++        l2 = torch.norm(preds - target, dim=-1)  # [n_atoms]
++        self.sum_l2 += l2.sum()
++        self.count += l2.numel()
++
++    def compute(self):
++        return self.sum_l2 / self.count
++
++
+ class MDTask(Task):
+     """
+     Task for MD17 molecular dynamics dataset.
+@@ -108,6 +126,11 @@ class MDTask(Task):
+                 "metric": torchmetrics.MeanAbsoluteError,
+                 "prediction": 'force',
+                 "target": 'dy',
++            },
++            {
++                "metric": MeanL2Error,
++                "prediction": 'force',
++                "target": 'dy',
+             }
+         ]
+ 
