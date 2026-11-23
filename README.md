@@ -1,7 +1,7 @@
 # ATOMTRICK: Equivariant Force Fields via Learned O(2)-Linear Projections
 
 Code for the paper *"ATOMTRICK: Equivariant Force Fields via Learned
-O(2)-Linear Projections"*. The Python package is `AtomTrick`.
+O(2)-Linear Projections"*, included as `paper/AtomTrick.pdf`. The Python package is `AtomTrick`.
 
 ATOMTRICK is an O(3)-equivariant machine-learned force field that does not use
 Clebsch–Gordan tensor products.
@@ -49,6 +49,7 @@ scripts/reproduce/    bash drivers for every experiment
 scripts/aggregate/    evaluation JSON -> paper tables (mean ± std over seeds, baselines)
 benchmarks/latency/   inference latency / throughput / memory benchmark
 md/                   OpenMM molecular dynamics (NVE, NVT, Ramachandran)
+paper/                the paper (PDF)
 tests/                pytest suite (CPU; GPU-only tests skip automatically)
 LICENSE               MIT license of the code (Copyright (c) 2026 The ATOMTRICK Authors);
                       THIRD_PARTY_NOTICES.md lists the adapted components
